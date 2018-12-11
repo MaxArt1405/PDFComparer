@@ -1,0 +1,11 @@
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\bin\Debug\netcoreapp2.1\PDFComparator.deps.json
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\bin\Debug\netcoreapp2.1\PDFComparator.runtimeconfig.json
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\bin\Debug\netcoreapp2.1\PDFComparator.runtimeconfig.dev.json
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\bin\Debug\netcoreapp2.1\PDFComparator.dll
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\obj\Debug\netcoreapp2.1\PDFComparator.csprojAssemblyReference.cache
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\obj\Debug\netcoreapp2.1\PDFComparator.csproj.CoreCompileInputs.cache
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\obj\Debug\netcoreapp2.1\PDFComparator.AssemblyInfoInputs.cache
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\obj\Debug\netcoreapp2.1\PDFComparator.AssemblyInfo.cs
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\bin\Debug\netcoreapp2.1\PDFComparator.pdb
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\obj\Debug\netcoreapp2.1\PDFComparator.dll
+C:\Users\Lenovo\source\repos\PDFComparator\PDFComparator\obj\Debug\netcoreapp2.1\PDFComparator.pdb
