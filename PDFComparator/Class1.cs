@@ -1,4 +1,5 @@
-﻿using iTextSharp.text.pdf;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using System;
 using System.Collections.Generic;
@@ -6,86 +7,131 @@ using System.IO;
 using System.Linq;
 public class Class1
 {
-    static string FirstFile, SecondFile;
-    public static void CompareTwoPDF(string FirstPDF, string SecondPDF)
+    struct CurrentRes
     {
-        if (File.Exists(FirstPDF) && File.Exists(SecondPDF))
+        public Dictionary<string, string> AcroFields { get; set; }
+        public byte[] PdfData { get; set; }
+    }
+    struct BaseFields
+    {
+        public Dictionary<string, string> AcroFields { get; set; }
+        public byte[] PdfData { get; set; }
+    }
+    public void MergePdfs()
+    {
+        CurrentRes Current = new CurrentRes();
+        CurrentRes BaseFields = new CurrentRes();
+        Dictionary<string, string> currentFields = Current.AcroFields;
+        Dictionary<string, string> mergeResult = MergeCaseWithBaseLine(currentFields, BaseFields.AcroFields);
+
+        if (mergeResult.Count > 0)
         {
-            PdfReader reader = new PdfReader(FirstPDF);
-            for (int page = 1; page <= reader.NumberOfPages; page++)
+            PdfReader baseLinePdfReader = new PdfReader(BaseFields.PdfData);
+            using (MemoryStream pdfStream = new MemoryStream())
             {
-                ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
-                FirstFile += PdfTextExtractor.GetTextFromPage(reader, page, strategy);
+                PdfStamper stamp = new PdfStamper(baseLinePdfReader, pdfStream);
+                foreach (var item in mergeResult)
+                {
+                    HighLightFields(item.Key, stamp);
+                }
+                stamp.FormFlattening = false;
+                stamp.Close();
+                baseLinePdfReader.Close();
+                pdfStream.Flush();
+                pdfStream.Close();     
             }
-            PdfReader reader1 = new PdfReader(SecondPDF);
-            for (int page = 1; page <= reader.NumberOfPages; page++)
+
+            PdfReader currPdfReader = new PdfReader(Current.PdfData);
+            using (MemoryStream pdfStream = new MemoryStream())
             {
-                ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
-                SecondFile += PdfTextExtractor.GetTextFromPage(reader1, page, strategy);
+                PdfStamper stamp = new PdfStamper(currPdfReader, pdfStream);
+                foreach (var item in mergeResult)
+                {
+                    HighLightFields(item.Key, stamp);
+                }
+                stamp.FormFlattening = false;
+                stamp.Close();
+                baseLinePdfReader.Close();
+                pdfStream.Flush();
+                pdfStream.Close();
             }
         }
         else
         {
-            Console.WriteLine("Files does not exist.");
+            return;
         }
+    }
 
-        List<string> File1diff;
-        List<string> File2diff;
-        IEnumerable<string> file1 = FirstFile.Trim().Split('\r', '\n');
-        IEnumerable<string> file2 = SecondFile.Trim().Split('\r', '\n');
-        File1diff = file1.ToList();
-        File2diff = file2.ToList();
 
-        if (file2.Count() > file1.Count())
+    private Dictionary<string, string> MergeCaseWithBaseLine(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
+    {
+        var dict3 = new Dictionary<string, string>();
+        var first = MergeDictionary(dict1, dict2);
+        foreach (var item in first)
         {
-            Console.WriteLine("File 1 has less number of lines than File 2.");
-            for (int i = 0; i < File1diff.Count; i++)
-            {
-                if (!File1diff[i].Equals(File2diff[i]))
-                {
-                    Console.WriteLine("File 1 content: " + File1diff[i] + "\r\n" + "File 2 content: " + File2diff[i]);
-                }
-
-            }
-
-            for (int i = File1diff.Count; i < File2diff.Count; i++)
-            {
-                Console.WriteLine("File 2 extra content: " + File2diff[i]);
-            }
-
+            if (!dict3.ContainsKey(item.Key))
+                dict3.Add(item.Key, item.Value);
         }
-        else if (file2.Count() < file1.Count())
+        var second = MergeDictionary(dict2, dict1);
+        foreach (var item in second)
         {
-            Console.WriteLine("File 2 has less number of lines than File 1.");
-
-            for (int i = 0; i < File2diff.Count; i++)
-            {
-                if (!File1diff[i].Equals(File2diff[i]))
-                {
-                    Console.WriteLine("File 1 content: " + File1diff[i] + "\r\n" + "File 2 content: " + File2diff[i]);
-                }
-
-            }
-
-            for (int i = File2diff.Count; i < File1diff.Count; i++)
-            {
-                Console.WriteLine("File 1 extra content: " + File1diff[i]);
-            }
+            if (!dict3.ContainsKey(item.Key))
+                dict3.Add(item.Key, item.Value);
         }
-        else
+        return dict3;//FilterIgnoredNodes(dict3); // ability to ignore some fields, which will be always different
+    }
+
+
+
+    private Dictionary<string, string> MergeDictionary(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
+    {
+        var dict3 = new Dictionary<string, string>();
+        foreach (var item in dict2)
         {
-            Console.WriteLine("File 1 and File 2, both are having same number of lines.");
-
-            for (int i = 0; i < File1diff.Count; i++)
+            if (!dict1.ContainsKey(item.Key))
             {
-                if (!File1diff[i].Equals(File2diff[i]))
+                if (!dict3.ContainsKey(item.Key))
                 {
-                    Console.WriteLine("File 1 content: " + File1diff[i] + "\r\n" + "File 2 Content: " + File2diff[i]);
+                    dict3.Add(item.Key, item.Value);
                 }
-
             }
-
+            else
+            {
+                dict1.TryGetValue(item.Key, out string value);
+                if (!item.Value.Equals(value))
+                {
+                    if (!dict3.ContainsKey(item.Key))
+                    {
+                        dict3.Add(item.Key, item.Value);
+                    }
+                }
+            }
         }
+        return dict3;
+    }
 
+
+
+
+    private void HighLightFields(string field, PdfStamper stamp)
+    {
+        var fieldPositions = stamp.AcroFields.GetFieldPositions(field);
+        if (fieldPositions == null)
+            return;
+
+        var positions = fieldPositions.ToArray();
+
+        for (int i = 0; i < positions.Length; i++)
+        {
+            int pageNum = positions[i].page;
+            float left = (float)Math.Round(positions[i].position.Left);
+            float right = (float)Math.Round(positions[i].position.Right);
+            float top = (float)Math.Round(positions[i].position.Top);
+            float bottom = (float)Math.Round(positions[i].position.Bottom);
+            PdfContentByte contentByte = stamp.GetOverContent(pageNum);
+            contentByte.SetColorFill(BaseColor.ORANGE);
+            contentByte.Rectangle(left, top, right - left, bottom - top);
+            contentByte.Fill();
+        }
     }
 }
