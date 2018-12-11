@@ -738,23 +738,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Lenovo\\.nuget\\packages\\": {},
+    "C:\\Users\\MaximK\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Lenovo\\source\\repos\\PDFComparator\\PDFComparator\\PDFComparator.csproj",
+      "projectUniqueName": "C:\\Users\\MaximK\\Desktop\\PDFComparer\\PDFComparator\\PDFComparator.csproj",
       "projectName": "PDFComparator",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\PDFComparator\\PDFComparator\\PDFComparator.csproj",
-      "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Lenovo\\source\\repos\\PDFComparator\\PDFComparator\\obj\\",
+      "projectPath": "C:\\Users\\MaximK\\Desktop\\PDFComparer\\PDFComparator\\PDFComparator.csproj",
+      "packagesPath": "C:\\Users\\MaximK\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\MaximK\\Desktop\\PDFComparer\\PDFComparator\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\MaximK\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
