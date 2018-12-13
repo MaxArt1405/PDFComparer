@@ -12,8 +12,8 @@ namespace PDFComparator
     {
         static void Main(string[] args)
         {
-            string FirstPDF = "ICC16New.pdf";
-            string SecondPDF = "ICC16Edit.pdf";
+            string FirstPDF = "ICC16Old.pdf";
+            string SecondPDF = "ICC16New.pdf";
             CompareTwoPDF(FirstPDF, SecondPDF);
             Console.ReadLine();
         }
@@ -26,7 +26,7 @@ namespace PDFComparator
 
             Dictionary<string, string> file1 = GetFormFieldValues(reader);
             Dictionary<string, string> file2 = GetFormFieldValues(reader1);
-
+            
             Dictionary<string, string> mergeResult = MergeDictionary(file1, file2);
             using (MemoryStream pdfStream = new MemoryStream())
             {
@@ -57,35 +57,38 @@ namespace PDFComparator
             {
                 foreach (var item in mergeResult)
                 {
-                    file.WriteLine("\r\n" + item.Key + "----" + item.Value);
+                    file.WriteLine("\r\n" + " " + item.Value);
                 }
             }
             using (var file = new StreamWriter("FirstPDF.json", false))
             {
-                foreach(var item in file1)
+                foreach (var item in file1)
                 {
-                    file.WriteLine("\r\n" + item.Key + "----" + item.Value);
+                    file.WriteLine("\r\n" + " " + item.Value);
                 }
             }
             using (var file = new StreamWriter("SecondPDF.json", false))
             {
                 foreach (var item in file2)
                 {
-                    file.WriteLine("\r\n" + item.Key + "----" + item.Value);
+                    file.WriteLine("\r\n" + " " + item.Value);
                 }
             }
         }
         private static Dictionary<string, string> GetFormFieldValues(PdfReader pdfReader)
         {
-            var dict = new Dictionary<string, string>
+            AcroFields form = pdfReader.AcroFields;
+            var dict = new Dictionary<string, string>();
+            foreach(var item in form.Fields)
             {
-                { string.Join("\r\n", pdfReader.AcroFields.Fields.Select(x => x.Key).ToArray()), string.Join("\r\n",pdfReader.AcroFields.Fields.Select(y => pdfReader.AcroFields.GetField(y.Key)).ToArray()) }
-            };
+                dict.Add(item.Key, form.GetField(item.Key));
+            }
             return dict;
         }
         private static Dictionary<string, string> MergeDictionary(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
         {
             var dict3 = new Dictionary<string, string>();
+
             foreach (var item in dict2)
             {
                 if (!dict1.ContainsKey(item.Key))
@@ -131,5 +134,4 @@ namespace PDFComparator
             }
         }
     }
-
 }
