@@ -15,64 +15,44 @@ namespace PDFComparator
             string FirstPDF = "ICC16Old.pdf";
             string SecondPDF = "ICC16New.pdf";
             CompareTwoPDF(FirstPDF, SecondPDF);
-            Console.ReadLine();
         }
 
         private static void CompareTwoPDF(string FirstPDF, string SecondPDF)
         {
-
             PdfReader reader1 = new PdfReader(SecondPDF);
             PdfReader reader = new PdfReader(FirstPDF);
-
+            string firstcopy = "First.pdf";
+            string secondcopy = "Second.pdf";
             Dictionary<string, string> file1 = GetFormFieldValues(reader);
             Dictionary<string, string> file2 = GetFormFieldValues(reader1);
             
             Dictionary<string, string> mergeResult = MergeDictionary(file1, file2);
-            using (MemoryStream pdfStream = new MemoryStream())
-            {
-                PdfStamper stamp = new PdfStamper(reader, pdfStream);
-                foreach (var item in mergeResult)
-                {
-                    HighLightFields(item.Key, stamp);
-                }
-                stamp.FormFlattening = false;
-                stamp.Close();
-                pdfStream.Flush();
-                pdfStream.Close();
-            }
+            Logger(GetFormFieldValues(reader), GetFormFieldValues(reader1), mergeResult);
 
+            HighLighter(FirstPDF, firstcopy, reader, mergeResult);
+            HighLighter(SecondPDF, secondcopy, reader1, mergeResult);
+
+            
+        }
+        private static void HighLighter(string path, string copypath, PdfReader reader, Dictionary<string,string> merge)
+        {
             using (MemoryStream pdfStream = new MemoryStream())
             {
-                PdfStamper stamp = new PdfStamper(reader1, pdfStream);
-                foreach (var item in mergeResult)
+                Document doc = new Document();
+                PdfCopy copy = new PdfCopy(doc, new FileStream(copypath, FileMode.Create));
+                PdfStamper stamp = new PdfStamper(reader, pdfStream);
+                doc.Open();
+                foreach (var item in merge)
                 {
                     HighLightFields(item.Key, stamp);
                 }
-                stamp.FormFlattening = false;
-                stamp.Close();
+                copy.AddDocument(reader);
+                doc.Close();
+                stamp.FormFlattening = true;
+                stamp.Close();    
+                
                 pdfStream.Flush();
                 pdfStream.Close();
-            }
-            using (var file = new StreamWriter("Merge.json", false))
-            {
-                foreach (var item in mergeResult)
-                {
-                    file.WriteLine("\r\n" + " " + item.Value);
-                }
-            }
-            using (var file = new StreamWriter("FirstPDF.json", false))
-            {
-                foreach (var item in file1)
-                {
-                    file.WriteLine("\r\n" + " " + item.Value);
-                }
-            }
-            using (var file = new StreamWriter("SecondPDF.json", false))
-            {
-                foreach (var item in file2)
-                {
-                    file.WriteLine("\r\n" + " " + item.Value);
-                }
             }
         }
         private static Dictionary<string, string> GetFormFieldValues(PdfReader pdfReader)
@@ -122,15 +102,33 @@ namespace PDFComparator
 
             for (int i = 0; i < positions.Length; i++)
             {
-                int pageNum = positions[i].page;
-                float left = (float)Math.Round(positions[i].position.Left);
-                float right = (float)Math.Round(positions[i].position.Right);
-                float top = (float)Math.Round(positions[i].position.Top);
-                float bottom = (float)Math.Round(positions[i].position.Bottom);
-                PdfContentByte contentByte = stamp.GetOverContent(pageNum);
-                contentByte.SetColorFill(BaseColor.ORANGE);
-                contentByte.Rectangle(left, top, right - left, bottom - top);
+                PdfContentByte contentByte = stamp.GetOverContent(positions[i].page);
+                contentByte.SetRGBColorFill(100, 100, 100);
                 contentByte.Fill();
+            }
+        }
+        private static void Logger(Dictionary<string, string> file1, Dictionary<string, string> file2, Dictionary<string, string> mergeResult)
+        {
+            using (var file = new StreamWriter("Merge.json", false))
+            {
+                foreach (var item in mergeResult)
+                {
+                    file.WriteLine("\r\n" + " " + item.Value);
+                }
+            }
+            using (var file = new StreamWriter("FirstPDF.json", false))
+            {
+                foreach (var item in file1)
+                {
+                    file.WriteLine("\r\n" + " " + item.Value);
+                }
+            }
+            using (var file = new StreamWriter("SecondPDF.json", false))
+            {
+                foreach (var item in file2)
+                {
+                    file.WriteLine("\r\n" + " " + item.Value);
+                }
             }
         }
     }
